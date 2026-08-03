@@ -375,18 +375,26 @@ fallback history.
 Here are the details on the messages that you can send to the callback
 parameter to the =on_accept= proc.
 
-*** =append(text, follow: true)=
+*** =append(text, follow: true, role: nil)=
 Add the given text to the output pane.  After a full page of output is
 produced, enter paging mode so the user can view the output at leisure and
 search the output. If =follow= is true, keep the output pane's viewport
 covering the last lines of output.
 
-*** =append_now(text, follow: true, mode: nil)=
+You can specify a "role" of =:good=, =:info=, =:warn=, or =:error= to color
+the output according to the current theme's coloring scheme for those roles.
+Those role names can be symbols or strings.
+
+*** =append_now(text, follow: true, mode: nil, role: nil)=
 Like =append=, but display output as it is produced rather than wait for a
 full page to be produced.
 
 Setting the mode to =:scrolling= or =:paging= determines whether the output is
 scrolled continuously or paused on each page of output.
+
+You can specify a "role" of =:good=, =:info=, =:warn=, or =:error= to color
+the output according to the current theme's coloring scheme for those roles.
+Those role names can be symbols or strings.
 
 *** =markdown(text)=
 Render the given text as markdown source according to the current theme then

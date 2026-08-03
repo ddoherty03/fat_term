@@ -9,6 +9,13 @@ module Fatty
         @io = io
       end
 
+      def style(text, role:, palette:)
+        spec = palette&.[](role.to_sym)
+        return text.to_s unless spec
+
+        "#{sgr_for_spec(spec)}#{text}#{reset}"
+      end
+
       def render_line(row:, col:, width:, text:, role:, palette:)
         spec = palette&.[](role)
         return unless spec

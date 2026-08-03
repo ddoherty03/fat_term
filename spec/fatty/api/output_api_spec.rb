@@ -4,7 +4,13 @@ require "spec_helper"
 
 module Fatty
   RSpec.describe OutputApi do
-    let(:renderer) { instance_double(Fatty::Renderer, palette: :palette) }
+    let(:palette) { :palette }
+    let(:renderer) {
+      instance_double(
+        Fatty::Renderer,
+        palette: palette,
+      )
+    }
     let(:terminal) do
       term = instance_double(Fatty::Terminal, renderer: renderer)
       allow(term).to receive(:apply_command)
@@ -40,6 +46,38 @@ module Fatty
         env.append(:hello)
 
         expect(env.commands.first.payload.fetch(:text)).to eq("hello")
+      end
+
+      context "with a role palette" do
+        let(:palette) do
+          {
+            good: {
+              fg_rgb: [0, 255, 0],
+              bg_rgb: nil,
+              attrs: [],
+            },
+          }
+        end
+
+        it "styles output using a theme role" do
+          env.append("hello", role: :good)
+
+          expect(env.commands.first.payload)
+            .to eq(
+                  text: "\e[0m\e[38;2;0;255;0mhello\e[0m",
+                  follow: true,
+                )
+        end
+
+        it "leaves output unchanged when the role is unknown" do
+          env.append("hello", role: :missing)
+
+          expect(env.commands.first.payload)
+            .to eq(
+                  text: "hello",
+                  follow: true,
+                )
+        end
       end
     end
 
@@ -87,6 +125,34 @@ module Fatty
                         action: :append,
                         payload: { text: "hello", follow: true },
                       ))
+      end
+
+      context "with a role palette" do
+        let(:palette) do
+          {
+            good: {
+              fg_rgb: [0, 255, 0],
+              bg_rgb: nil,
+              attrs: [],
+            },
+          }
+        end
+
+        it "styles output using a theme role" do
+          env.append_now("hello", role: :good)
+
+          expect(terminal)
+            .to have_received(:apply_command)
+                  .with(
+                    have_attributes(
+                      action: :append,
+                      payload: {
+                        text: "\e[0m\e[38;2;0;255;0mhello\e[0m",
+                        follow: true,
+                      },
+                    ),
+                  )
+        end
       end
     end
 

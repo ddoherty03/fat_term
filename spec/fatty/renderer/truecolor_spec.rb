@@ -87,8 +87,8 @@ module Fatty
       expect(out.string).to include("38;2;0;0;0")
       expect(out.string).to include("48;2;240;248;255")
       expect(out.string).to include("Ready")
-    ensure
-      $stdout = original_stdout
+      ensure
+        $stdout = original_stdout
     end
 
     it "renders ANSI colors embedded in the input prompt" do
@@ -107,8 +107,8 @@ module Fatty
       expect(out.string).to include("red")
       expect(out.string).to include("> ")
       expect(out.string).to include("hello")
-    ensure
-      $stdout = original_stdout
+      ensure
+        $stdout = original_stdout
     end
 
     it "renders original zero-padded line numbers for narrowed visible lines" do
@@ -257,8 +257,43 @@ module Fatty
       col = screen.input_rect.col + screen.input_rect.cols
 
       expect(out.string).to include("\e[#{row};#{col}H")
-    ensure
-      $stdout = original_stdout
+      ensure
+        $stdout = original_stdout
+    end
+
+    describe "#style" do
+      let(:renderer) { Fatty::Ansi::Renderer.new }
+
+      it "wraps text in the specified palette role" do
+        palette = {
+          warn: {
+            fg_rgb: [255, 255, 0],
+            bg_rgb: [10, 20, 30],
+            attrs: [:bold],
+          },
+        }
+
+        result = renderer.style(
+          "Careful",
+          role: :warn,
+          palette: palette,
+        )
+
+        expect(result).to eq(
+                            "\e[0m\e[1m\e[38;2;255;255;0m" \
+                            "\e[48;2;10;20;30mCareful\e[0m",
+                          )
+      end
+
+      it "returns plain text when the role is unavailable" do
+        result = renderer.style(
+          "Careful",
+          role: :warn,
+          palette: {},
+        )
+
+        expect(result).to eq("Careful")
+      end
     end
   end
 end

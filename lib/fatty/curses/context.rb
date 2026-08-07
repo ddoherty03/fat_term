@@ -135,8 +135,14 @@ module Fatty
 
       def close
         close_windows
-        disable_bracketed_paste! if @started
-        ::Curses.close_screen if @started
+        if @started
+          disable_bracketed_paste!
+          ::Curses.curs_set(1)
+          ::Curses.noraw
+          ::Curses.echo
+          ::Curses.nl
+          ::Curses.close_screen
+        end
         @started = false
       end
 

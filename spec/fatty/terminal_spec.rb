@@ -660,6 +660,26 @@ module Fatty
         expect(t).to have_received(:refresh_layout!)
         expect(t).to have_received(:render_frame)
       end
+
+      it "restores curses and redraws when the block raises" do
+        t = terminal
+
+        allow(t).to receive(:stop_curses!)
+        allow(t).to receive(:start_curses!)
+        allow(t).to receive(:refresh_layout!)
+        allow(t).to receive(:render_frame)
+
+        expect {
+          t.suspend do
+            raise "boom"
+          end
+        }.to raise_error(RuntimeError, "boom")
+
+        expect(t).to have_received(:stop_curses!)
+        expect(t).to have_received(:start_curses!)
+        expect(t).to have_received(:refresh_layout!)
+        expect(t).to have_received(:render_frame)
+      end
     end
   end
 end

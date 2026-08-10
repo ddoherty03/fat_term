@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
 require "curses"
+require "fiddle/import"
 
 module Fatty
   module Curses
+    module Native
+      extend Fiddle::Importer
+
+      dlload Fiddle.dlopen(nil)
+      extern "int endwin()"
+    end
     # Context represents the active curses environment.
     #
     # It owns:
@@ -131,6 +138,24 @@ module Fatty
         @output_win.scrollok(true)
         @input_win.keypad(true)
         self
+      end
+
+      def suspend
+        return unless @started
+
+        ::Curses.def_prog_mode
+        disable_bracketed_paste!
+        ::Curses.curs_set(1)
+        Native.endwin
+        nil
+      end
+
+      def resume
+        return unless @started
+
+        ::Curses.refresh
+        enable_bracketed_paste!
+        nil
       end
 
       def close

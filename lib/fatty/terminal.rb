@@ -177,14 +177,12 @@ module Fatty
 
     # --- Suspension  ------------------------------------------------
 
-    # Suspend fatty and run the block in the normal terminal, then restore
-    # fatty's terminal on exit.
     def suspend
-      stop_curses!
+      ctx.suspend
       yield
     ensure
-      start_curses!
-      refresh_layout!
+      ctx.resume
+      renderer.invalidate!
       render_frame
     end
 

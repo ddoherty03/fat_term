@@ -139,6 +139,18 @@ module Fatty
       preflight!
       start_curses!
       install_default_sessions!
+
+      if (warning = Fatty::Themes::Manager.warning)
+        apply_command(
+          Command.session(
+            :alert,
+            :show,
+            role: :warn,
+            text: warning,
+          ),
+        )
+      end
+
       Fatty.debug("@sessions: #{@sessions.map(&:id).join('==')}")
 
       @running = true

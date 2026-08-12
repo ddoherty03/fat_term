@@ -11,7 +11,7 @@ using Fatty::CoreExt::String
 
 prompt = Fatty::Prompt.new { "#{Dir.pwd}> " }
 history_ctx_proc = -> { { pwd: Dir.pwd } }
-emit_text = lambda do |args|
+append_text = lambda do |args|
   if args.length == 1 && File.file?(File.expand_path(args.first))
     File.read(File.expand_path(args.first))
   elsif args.empty?
@@ -134,8 +134,8 @@ on_accept_proc = lambda do |line, env|
     else
       env.append("menu: result #{result.inspect}\n")
     end
-  when "emit", "emit_good", "emit_info", "emit_warn", "emit_error",
-    "emit_now", "emit_now_good", "emit_now_info", "emit_now_warn", "emit_now_error"
+  when "append", "append_good", "append_info", "append_warn", "append_error",
+    "append_now", "append_now_good", "append_now_info", "append_now_warn", "append_now_error"
     role =
       case cmd
       when /_good\z/  then :good
@@ -143,12 +143,24 @@ on_accept_proc = lambda do |line, env|
       when /_warn\z/  then :warn
       when /_error\z/ then :error
       end
-    text = emit_text.call(args)
-    if cmd.start_with?("emit_now")
+    text = append_text.call(args)
+    if cmd.start_with?("append_now")
       env.append_now(text, role: role)
     else
       env.append(text, role: role)
     end
+    nil
+  when "append_roles"
+    env.append("GOOD\n", role: :good)
+    env.append("INFO\n", role: :info)
+    env.append("WARN\n", role: :warn)
+    env.append("ERROR\n", role: :error)
+    nil
+  when "append_now_roles"
+    env.append_now("GOOD\n", role: :good)
+    env.append_now("INFO\n", role: :info)
+    env.append_now("WARN\n", role: :warn)
+    env.append_now("ERROR\n", role: :error)
     nil
   when "info"
     message = args.empty? ? "Information message" : args.join(" ")
@@ -411,6 +423,18 @@ end
 cutes = cutes.compact.sort_by(&:downcase).uniq
 
 builtins = %w[
+  append
+  append_good
+  append_info
+  append_now
+  append_now_error
+  append_now_good
+  append_now_info
+  append_now_roles
+  append_now_warn
+  append_error
+  append_roles
+  append_warn
   cd
   choose
   choosevals

@@ -78,6 +78,19 @@ module Fatty
                   follow: true,
                 )
         end
+
+        it "styles each line of multiline output using the role" do
+          env.append("one\ntwo\nthree", role: :good)
+
+          expect(env.commands.first.payload)
+            .to eq(
+                  text:
+                  "\e[0m\e[38;2;0;255;0mone\e[0m\n" \
+                  "\e[0m\e[38;2;0;255;0mtwo\e[0m\n" \
+                  "\e[0m\e[38;2;0;255;0mthree\e[0m",
+                  follow: true,
+                )
+        end
       end
     end
 

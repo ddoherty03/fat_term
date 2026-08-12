@@ -29,21 +29,17 @@ region:
 
 info:
   fg: default
-  bg: default
 
 good:
   fg: default
-  bg: default
   attrs: [bold]
 
 warn:
   fg: default
-  bg: default
   attrs: [reverse]
 
 error:
   fg: default
-  bg: default
   attrs: [bold, reverse]
 
 pager_status:

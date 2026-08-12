@@ -26,19 +26,15 @@ region:
 
 good:
   fg: "#9ece6a"
-  bg: "#1a1b26"
 
 info:
   fg: "#c0caf5"
-  bg: "#1a1b26"
 
 warn:
   fg: "#1a1b26"
-  bg: "#e0af68"
 
 error:
   fg: "#1a1b26"
-  bg: "#f7768e"
 
 pager_status:
   fg: "#1a1b26"

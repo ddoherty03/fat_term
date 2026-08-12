@@ -2,7 +2,11 @@
 
 module Fatty
   class OutputSession < Session
-    VisibleLine = Data.define(:number, :text) do
+    VisibleLine = Data.define(:number, :text, :fragments) do
+      def initialize(number:, text:, fragments: [])
+        super
+      end
+
       def to_s
         text.to_s
       end
@@ -55,9 +59,14 @@ module Fatty
             pager.toggle_paging_mode if pager.mode == :scrolling
           end
           before = output.lines.length
+          Fatty.debug(
+            "output append role=#{payload[:role].inspect} text=#{payload[:text].inspect}",
+            tag: :session,
+          )
           append_output(
             payload.fetch(:text, ""),
             follow: payload.fetch(:follow, true),
+            role: payload[:role],
           )
           reveal_appended_block(before) if payload[:scroll]
           []
@@ -246,16 +255,23 @@ module Fatty
       @visible_lines ||=
         if narrowed?
           terms = narrow_query.split
-
           output.lines.each_with_index.filter_map do |text, index|
             visible_text = visible_output_text(text)
             next unless terms.all? { |term| visible_text.include?(term) }
 
-            VisibleLine.new(number: index + 1, text: text)
+            VisibleLine.new(
+              number: index + 1,
+              text: text,
+              fragments: output.fragments_for(index),
+            )
           end
         else
           output.lines.each_with_index.map do |text, index|
-            VisibleLine.new(number: index + 1, text: text)
+            VisibleLine.new(
+              number: index + 1,
+              text: text,
+              fragments: output.fragments_for(index),
+            )
           end
         end
     end
@@ -377,8 +393,8 @@ module Fatty
       vp
     end
 
-    def append_output(text, follow: true)
-      ntrim = @output.append(text.to_s)
+    def append_output(text, follow: true, role: nil)
+      ntrim = @output.append(text.to_s, role: role)
       invalidate_visible_lines!
       @pager.on_append(ntrim: ntrim)
 
@@ -474,7 +490,7 @@ module Fatty
     end
 
     def reset_output!
-      @output.lines.clear
+      @output.clear
       invalidate_visible_lines!
       @viewport.reset
     end

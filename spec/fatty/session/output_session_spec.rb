@@ -595,14 +595,8 @@ module Fatty
         init_output_session(session)
         update(session, :append, text: "alpha\nbeta\ngamma", follow: false)
 
-        expect(session.visible_lines)
-          .to eq(
-                [
-                  Fatty::OutputSession::VisibleLine.new(number: 1, text: "alpha"),
-                  Fatty::OutputSession::VisibleLine.new(number: 2, text: "beta"),
-                  Fatty::OutputSession::VisibleLine.new(number: 3, text: "gamma"),
-                ],
-              )
+        expect(session.visible_lines.map { |line| [line.number, line.text] })
+          .to eq([[1, "alpha"], [2, "beta"], [3, "gamma"],])
       end
 
       it "returns only matching lines while retaining original line numbers" do
@@ -617,14 +611,56 @@ module Fatty
 
         apply_narrowing(session, "alpha")
 
-        expect(session.visible_lines)
-          .to eq(
-                [
-                  Fatty::OutputSession::VisibleLine.new(number: 1, text: "alpha"),
-                  Fatty::OutputSession::VisibleLine.new(number: 2, text: "beta alpha"),
-                  Fatty::OutputSession::VisibleLine.new(number: 4, text: "alpha delta"),
-                ],
-              )
+        expect(session.visible_lines.map { |line| [line.number, line.text] })
+          .to eq([[1, "alpha"], [2, "beta alpha"], [4, "alpha delta"],])
+      end
+
+      it "preserves output role fragments in visible lines" do
+        session = Fatty::OutputSession.new
+        session.update(
+          Fatty::Command.session(
+            session.id,
+            :append,
+            text: "hello\nworld",
+            role: :good,
+          ),
+        )
+
+        expect(session.visible_lines.map(&:text)).to eq(["hello", "world"])
+        expect(
+          session.visible_lines.map { |line| line.fragments.map(&:role) },
+        ).to eq([[:good], [:good]])
+      end
+
+      it "preserves different roles within a partially appended line" do
+        session = Fatty::OutputSession.new
+        session.update(
+          Fatty::Command.session(
+            session.id,
+            :append,
+            text: "ordinary ",
+          ),
+        )
+        session.update(
+          Fatty::Command.session(
+            session.id,
+            :append,
+            text: "good\n",
+            role: :good,
+          ),
+        )
+
+        line = session.visible_lines.first
+
+        expect(line.text).to eq("ordinary good")
+        expect(
+          line.fragments.map { |fragment| [fragment.text, fragment.role] },
+        ).to eq(
+               [
+                 ["ordinary ", nil],
+                 ["good", :good],
+               ],
+             )
       end
 
       it "requires all narrowing terms but permits them in any order" do

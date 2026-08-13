@@ -31,7 +31,7 @@ info:
   fg: "#2d80d2"
 
 warn:
-  fg: "#eeee00"
+  fg: "#977a20"
 
 error:
   fg: "#d94a4a"

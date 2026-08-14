@@ -704,21 +704,24 @@ module Fatty
         expect(session.visible_lines.map(&:number)).to eq([1])
         expect(session.visible_lines.map(&:text)).to eq(["\e[31malpha\e[0m"])
       end
-    end
 
-    def visible_lines
-      @visible_lines ||=
-        begin
-          terms = narrow_query.to_s.split
+      it "narrows output case-insensitively" do
+        session = Fatty::OutputSession.new
+        session.update(
+          Fatty::Command.session(
+            session.id,
+            :append,
+            text: "Alpha Bravo\ncharlie delta\n",
+          ),
+        )
 
-          output.lines.each_with_index.filter_map do |text, index|
-        visible_text = visible_output_text(text)
+        session.apply_prompt_result(
+          kind: :narrow_output,
+          text: "alpha BRAVO",
+        )
 
-        if terms.empty? || terms.all? { |term| visible_text.include?(term) }
-          VisibleLine.new(number: index + 1, text: text)
-        end
+        expect(session.visible_lines.map(&:text)).to eq(["Alpha Bravo"])
       end
-        end
     end
 
     describe "#tick" do

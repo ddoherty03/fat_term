@@ -254,9 +254,9 @@ module Fatty
     def visible_lines
       @visible_lines ||=
         if narrowed?
-          terms = narrow_query.split
+          terms = narrow_query.downcase.split
           output.lines.each_with_index.filter_map do |text, index|
-            visible_text = visible_output_text(text)
+            visible_text = visible_output_text(text).downcase
             next unless terms.all? { |term| visible_text.include?(term) }
 
             VisibleLine.new(

@@ -53,6 +53,8 @@ module Fatty
         if theme_names.include?(t)
           @warning = nil
           @current = t
+          Fatty::Config.set_preference(:theme, t)
+          @current
         else
           @warning = "Unknown theme in config: '#{theme}'; using '#{FALLBACK_THEME}'"
           Fatty.warn(@warning, tag: :theme)

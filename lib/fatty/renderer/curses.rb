@@ -346,6 +346,12 @@ module Fatty
         stage_window(win)
       end
 
+      def clear_physical_screen!
+        ::Curses.clear
+        invalidate!
+        self
+      end
+
       def begin_frame
       end
 

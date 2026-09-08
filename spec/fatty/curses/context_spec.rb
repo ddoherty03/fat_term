@@ -51,11 +51,13 @@ module Fatty
           context.instance_variable_set(:@started, true)
 
           allow(context).to receive(:enable_bracketed_paste!)
+          allow(::Curses).to receive(:reset_prog_mode)
           allow(::Curses).to receive(:refresh)
 
           context.resume
 
-          expect(::Curses).to have_received(:refresh)
+          expect(::Curses).to have_received(:reset_prog_mode).ordered
+          expect(::Curses).to have_received(:refresh).ordered
           expect(context).to have_received(:enable_bracketed_paste!)
         end
       end

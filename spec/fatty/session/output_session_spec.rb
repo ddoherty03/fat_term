@@ -104,11 +104,13 @@ module Fatty
         session = Fatty::OutputSession.new
         init_output_session(session)
         append_lines(session, 3)
+        allow(session.renderer).to receive(:clear_physical_screen!)
 
         update(session, :clear)
 
         expect(session.output.lines).to be_empty
         expect(session.viewport.top).to eq(0)
+        expect(session.renderer).to have_received(:clear_physical_screen!)
       end
 
       it "handles :resize" do

@@ -80,6 +80,7 @@ module Fatty
           []
         when :clear
           reset_output!
+          renderer.clear_physical_screen!
           []
         when :resize
           resize_output!

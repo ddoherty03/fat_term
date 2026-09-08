@@ -153,6 +153,7 @@ module Fatty
       def resume
         return unless @started
 
+        ::Curses.reset_prog_mode
         ::Curses.refresh
         enable_bracketed_paste!
         nil
